@@ -1604,67 +1604,6 @@ function downloadExcel() {
    ============================================================ */
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwCWmIBUYDWeBnUqG-CpZzQ8VTYL-Zv2KAnb1R4JjHBczhJcsxfLfUvRlm_fDtQqn256g/exec';
 
-async function submitForm() {
-  // ---- バリデーション ----
-  const rows = document.querySelectorAll('.order-row');
-  let hasError = false;
-  rows.forEach(row => {
-    const id = row.dataset.id;
-    if (!document.getElementById(`type_${id}`)?.value ||
-        !document.getElementById(`size_${id}`)?.value) hasError = true;
-  });
-  if (hasError) { showToast('種類・色 と サイズ をすべて選択してください', 'warn'); return; }
-
-  const customerName = document.getElementById('customerName').value.trim();
-  if (!customerName) { showToast('お客様名を入力してください', 'warn'); return; }
-
-  // ---- 送信データ組み立て ----
-  const entries = buildExcelRows();
-  const total   = entries.reduce((s, e) => s + e.qty, 0);
-  const lines   = entries.map(e => {
-    const namePart = e.nameYn === 'あり' ? `  ネーム: ${e.nameKana}（${e.nameAlpha}）` : '';
-    return `・${e.type}  ${e.nameYn}${namePart}  サイズ: ${e.size}  ${e.qty}枚`;
-  });
-
-  const payload = {
-    customerName,
-    lines,
-    total,
-    sentAt: new Date().toLocaleString('ja-JP'),
-  };
-
-  // ---- 送信ボタンを無効化 ----
-  const btn = document.querySelector('.btn-submit');
-  btn.disabled    = true;
-  btn.textContent = '送信中…';
-
-  try {
-    // GETパラメータ方式でGASに送信（no-corsでも確実に届く）
-    const params = new URLSearchParams({
-      customerName: payload.customerName,
-      lines:        JSON.stringify(payload.lines),
-      total:        payload.total,
-      sentAt:       payload.sentAt,
-    });
-
-    await fetch(GAS_URL + '?' + params.toString(), {
-      method: 'GET',
-      mode:   'no-cors',
-    });
-
-    document.getElementById('submitSuccess').style.display = 'block';
-    document.getElementById('submitSuccess').scrollIntoView({ behavior: 'smooth' });
-    showToast('✓ 送信が完了しました！', 'success');
-
-  } catch (err) {
-    console.error(err);
-    showToast('送信に失敗しました。時間をおいて再試行してください', 'warn');
-  } finally {
-    btn.disabled    = false;
-    btn.textContent = '✉ 送　信';
-  }
-}
-
 /* ============================================================
    AUTO SAVE (30秒ごと)
    ============================================================ */
