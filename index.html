@@ -577,7 +577,13 @@ body {
         <span class="arr" id="arr-type-d">▼</span>
       </button>
     </div>
-    <div class="tbl-head-cell">ネーム有無</div>
+    <div class="tbl-head-cell">
+      ネーム有無
+      <button class="sort-icon-btn" id="sort-name" title="ネーム有無で並び替え" onclick="sortRows('name',this)">
+        <span class="arr" id="arr-name-a">▲</span>
+        <span class="arr" id="arr-name-d">▼</span>
+      </button>
+    </div>
     <div class="tbl-head-cell">ネーム（ひらがな）</div>
     <div class="tbl-head-cell">ネーム（アルファベット）</div>
     <div class="tbl-head-cell">
@@ -652,7 +658,7 @@ body {
 
 <!-- 送信完了バナー -->
 <div class="submit-success" id="submitSuccess">
-  ✓ 送信が完了しました！ご注文ありがとうございます。
+  ✓ 送信が完了しました！ご入力ありがとうございます。
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1053,11 +1059,11 @@ function setupDrag(div) {
 const SIZE_ORDER = { 'S':0,'M':1,'L':2,'XL':3,'XXL':4,'XXXL':5 };
 
 function resetSortArrows() {
-  ['type','size','qty'].forEach(k => {
+  ['type','size','qty','name'].forEach(k => {
     const a = document.getElementById(`arr-${k}-a`);
     const d = document.getElementById(`arr-${k}-d`);
-    if (a) { a.classList.remove('active-arr'); }
-    if (d) { d.classList.remove('active-arr'); }
+    if (a) a.classList.remove('active-arr');
+    if (d) d.classList.remove('active-arr');
   });
 }
 
@@ -1078,6 +1084,7 @@ function sortRows(key, btnEl) {
       case 'type': return PRODUCTS.indexOf(document.getElementById(`type_${id}`)?.value ?? '');
       case 'size': return SIZE_ORDER[document.getElementById(`size_${id}`)?.value] ?? 99;
       case 'qty':  return parseInt(document.getElementById(`qty_${id}`)?.value) || 0;
+      case 'name': return document.getElementById(`name_yn_${id}`)?.value === 'あり' ? 0 : 1;
       default:     return 0;
     }
   };
@@ -1175,14 +1182,14 @@ function updateSummary() {
   let lastGroupKey = -1;
   tbody.innerHTML = entries.map(e => {
     const gk = summaryGroupKey(e.type, e.nameYn);
-    const sep = (lastGroupKey !== -1 && gk !== lastGroupKey) ? 'border-top:2px solid #f0d4d0;' : '';
+    const sep = (lastGroupKey !== -1 && gk !== lastGroupKey) ? 'border-top:1px solid #ddd;' : '';
     lastGroupKey = gk;
 
     // ネームあり → ひらがな（アルファベット）を表示
     let nameCell = '';
     if (e.nameYn === 'あり') {
-      const parts = [e.nameKana, e.nameAlpha ? `(${e.nameAlpha})` : ''].filter(Boolean).join(' ');
-      nameCell = `<span style="color:#555;font-size:0.8rem;margin-left:4px">${parts || '—'}</span>`;
+      const alpha = e.nameAlpha ? `(${e.nameAlpha})` : '';
+      nameCell = `<span style="color:#555;font-size:0.8rem;margin-left:4px">${alpha}</span>`;
     }
 
     return `<tr style="${sep}">
