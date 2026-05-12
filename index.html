@@ -54,6 +54,152 @@ body {
   padding-bottom: 2px;
 }
 
+/* ======== SORT PANEL ======== */
+.sort-panel {
+  max-width: 860px;
+  margin: 0 auto 10px;
+  background: var(--card);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.sort-panel-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--soft);
+  white-space: nowrap;
+  letter-spacing: 0.05em;
+}
+.sort-keys {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+.sort-key-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--red);
+  color: white;
+  border-radius: 20px;
+  padding: 4px 10px 4px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: default;
+  user-select: none;
+  white-space: nowrap;
+}
+.sort-key-chip .chip-num {
+  background: rgba(255,255,255,0.3);
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 900;
+}
+.sort-key-chip .chip-dir {
+  font-size: 0.7rem;
+  opacity: 0.9;
+}
+.sort-key-chip .chip-del {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 0;
+  line-height: 1;
+  margin-left: 2px;
+}
+.sort-key-chip .chip-del:hover { color: white; }
+.sort-empty {
+  font-size: 0.72rem;
+  color: #bbb;
+  font-style: italic;
+}
+.btn-sort-reset {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.72rem;
+  border: 1.5px solid var(--border);
+  background: white;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  color: var(--soft);
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+.btn-sort-reset:hover { border-color: var(--red); color: var(--red); }
+
+/* ======== CONFIRM MODAL ======== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 8000;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+  background: white;
+  border-radius: 8px;
+  padding: 28px 28px 20px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+}
+.modal-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+.modal-body {
+  font-size: 0.84rem;
+  color: var(--mid);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+.modal-body strong { color: var(--ink); }
+.modal-btns {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.modal-cancel {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.84rem;
+  border: 1.5px solid var(--border);
+  background: white;
+  border-radius: 4px;
+  padding: 8px 20px;
+  cursor: pointer;
+  color: var(--mid);
+}
+.modal-ok {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.84rem;
+  font-weight: 700;
+  border: none;
+  background: var(--red);
+  color: white;
+  border-radius: 4px;
+  padding: 8px 24px;
+  cursor: pointer;
+  box-shadow: 0 2px 0 #8b2020;
+}
+.modal-ok:hover { background: var(--red2); }
+
 /* ======== MAIN CARD ======== */
 .card {
   max-width: 860px;
@@ -564,6 +710,15 @@ body {
   <span class="jp-title">Tシャツ オーダーフォーム</span>
 </div>
 
+<!-- ソートパネル -->
+<div class="sort-panel">
+  <span class="sort-panel-label">ソート順：</span>
+  <div class="sort-keys" id="sortKeys">
+    <span class="sort-empty" id="sortEmpty">ヘッダーの ▲▼ をクリックして追加</span>
+  </div>
+  <button class="btn-sort-reset" onclick="resetAllSort()">× リセット</button>
+</div>
+
 <!-- Main card -->
 <div class="card">
 
@@ -572,30 +727,42 @@ body {
     <div class="tbl-head-cell">No.</div>
     <div class="tbl-head-cell">
       種類・色
-      <button class="sort-icon-btn" id="sort-type" title="種類順に並び替え" onclick="sortRows('type',this)">
+      <button class="sort-icon-btn" id="sort-type" title="種類順に並び替え" onclick="sortRows('type')">
         <span class="arr" id="arr-type-a">▲</span>
         <span class="arr" id="arr-type-d">▼</span>
       </button>
     </div>
     <div class="tbl-head-cell">
       ネーム有無
-      <button class="sort-icon-btn" id="sort-name" title="ネーム有無で並び替え" onclick="sortRows('name',this)">
+      <button class="sort-icon-btn" id="sort-name" title="ネーム有無で並び替え" onclick="sortRows('name')">
         <span class="arr" id="arr-name-a">▲</span>
         <span class="arr" id="arr-name-d">▼</span>
       </button>
     </div>
-    <div class="tbl-head-cell">ネーム（ひらがな）</div>
-    <div class="tbl-head-cell">ネーム（アルファベット）</div>
+    <div class="tbl-head-cell">
+      ネーム（ひらがな）
+      <button class="sort-icon-btn" id="sort-kana" title="ひらがな順に並び替え" onclick="sortRows('kana')">
+        <span class="arr" id="arr-kana-a">▲</span>
+        <span class="arr" id="arr-kana-d">▼</span>
+      </button>
+    </div>
+    <div class="tbl-head-cell">
+      ネーム（アルファベット）
+      <button class="sort-icon-btn" id="sort-alpha" title="アルファベット順に並び替え" onclick="sortRows('alpha')">
+        <span class="arr" id="arr-alpha-a">▲</span>
+        <span class="arr" id="arr-alpha-d">▼</span>
+      </button>
+    </div>
     <div class="tbl-head-cell">
       サイズ
-      <button class="sort-icon-btn" id="sort-size" title="サイズ順に並び替え" onclick="sortRows('size',this)">
+      <button class="sort-icon-btn" id="sort-size" title="サイズ順に並び替え" onclick="sortRows('size')">
         <span class="arr" id="arr-size-a">▲</span>
         <span class="arr" id="arr-size-d">▼</span>
       </button>
     </div>
     <div class="tbl-head-cell">
       数量
-      <button class="sort-icon-btn" id="sort-qty" title="数量順に並び替え" onclick="sortRows('qty',this)">
+      <button class="sort-icon-btn" id="sort-qty" title="数量順に並び替え" onclick="sortRows('qty')">
         <span class="arr" id="arr-qty-a">▲</span>
         <span class="arr" id="arr-qty-d">▼</span>
       </button>
@@ -661,6 +828,18 @@ body {
   ✓ 送信が完了しました！ご入力ありがとうございます。
 </div>
 
+<!-- 送信確認モーダル -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <div class="modal-title">✉ メールを送信しますか？</div>
+    <div class="modal-body" id="confirmModalBody"></div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">キャンセル</button>
+      <button class="modal-ok" id="modalOkBtn" onclick="doSend()">送信する</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -678,9 +857,7 @@ const SAVE_KEY = 'tshirt_order_v3';
 
 let rowId   = 0;
 let isDirty = false;
-
-// sort state: { key: 'type'|'size'|'qty', dir: 'asc'|'desc' }
-let sortState = null;
+let sortConditions = [];
 
 /* ============================================================
    TOAST
@@ -753,8 +930,9 @@ function clearAll() {
   document.getElementById('rowsContainer').innerHTML = '';
   rowId = 0;
   addRow();
-  sortState = null;
-  resetSortArrows();
+  sortConditions = [];
+  renderSortPanel();
+  renderSortArrows();
   markUnsaved();
   updateSummary();
   showToast('リセットしました');
@@ -1054,57 +1232,202 @@ function setupDrag(div) {
 }
 
 /* ============================================================
-   SORT (column header icons)
+   SORT — 複数条件対応
+   sortConditions = [{key, dir}, ...] 優先順に並ぶ
    ============================================================ */
 const SIZE_ORDER = { 'S':0,'M':1,'L':2,'XL':3,'XXL':4,'XXXL':5 };
+const SORT_LABELS = { type:'種類', name:'ネーム有無', kana:'ひらがな', alpha:'アルファベット', size:'サイズ', qty:'数量' };
 
-function resetSortArrows() {
-  ['type','size','qty','name'].forEach(k => {
-    const a = document.getElementById(`arr-${k}-a`);
-    const d = document.getElementById(`arr-${k}-d`);
-    if (a) a.classList.remove('active-arr');
-    if (d) d.classList.remove('active-arr');
-  });
+function getRowVal(row, key) {
+  const id = row.dataset.id;
+  switch (key) {
+    case 'type':  return PRODUCTS.indexOf(document.getElementById(`type_${id}`)?.value ?? '');
+    case 'size':  return SIZE_ORDER[document.getElementById(`size_${id}`)?.value] ?? 99;
+    case 'qty':   return parseInt(document.getElementById(`qty_${id}`)?.value) || 0;
+    case 'name':  return document.getElementById(`name_yn_${id}`)?.value === 'あり' ? 0 : 1;
+    case 'kana':  return (document.getElementById(`name_kana_${id}`)?.value  || '').trim();
+    case 'alpha': return (document.getElementById(`name_alpha_${id}`)?.value || '').trim().toUpperCase();
+    default:      return 0;
+  }
 }
 
-function sortRows(key, btnEl) {
-  // toggle direction
-  let dir = 'asc';
-  if (sortState && sortState.key === key) {
-    dir = sortState.dir === 'asc' ? 'desc' : 'asc';
-  }
-  sortState = { key, dir };
-
+function applySort() {
+  if (!sortConditions.length) return;
   const container = document.getElementById('rowsContainer');
   const rows = [...container.querySelectorAll('.order-row')];
-
-  const getVal = (row) => {
-    const id = row.dataset.id;
-    switch (key) {
-      case 'type': return PRODUCTS.indexOf(document.getElementById(`type_${id}`)?.value ?? '');
-      case 'size': return SIZE_ORDER[document.getElementById(`size_${id}`)?.value] ?? 99;
-      case 'qty':  return parseInt(document.getElementById(`qty_${id}`)?.value) || 0;
-      case 'name': return document.getElementById(`name_yn_${id}`)?.value === 'あり' ? 0 : 1;
-      default:     return 0;
-    }
-  };
-
   rows.sort((a, b) => {
-    const diff = getVal(a) - getVal(b);
-    return dir === 'asc' ? diff : -diff;
+    for (const { key, dir } of sortConditions) {
+      const va = getRowVal(a, key);
+      const vb = getRowVal(b, key);
+      // 文字列はlocaleCompare、数値は引き算
+      const diff = (typeof va === 'string')
+        ? va.localeCompare(vb, 'ja')
+        : va - vb;
+      if (diff !== 0) return dir === 'asc' ? diff : -diff;
+    }
+    return 0;
   });
   rows.forEach(r => container.appendChild(r));
   updateRowNumbers();
   markUnsaved();
-
-  // update arrow highlights
-  resetSortArrows();
-  const activeArrow = document.getElementById(`arr-${key}-${dir === 'asc' ? 'a' : 'd'}`);
-  if (activeArrow) activeArrow.classList.add('active-arr');
-
-  showToast('ソートしました');
 }
 
+function sortRows(key) {
+  const existing = sortConditions.find(c => c.key === key);
+  if (existing) {
+    // 既にある → 方向をトグル
+    existing.dir = existing.dir === 'asc' ? 'desc' : 'asc';
+  } else {
+    // 新規追加
+    sortConditions.push({ key, dir: 'asc' });
+  }
+  applySort();
+  renderSortPanel();
+  renderSortArrows();
+}
+
+function removeSortKey(key) {
+  sortConditions = sortConditions.filter(c => c.key !== key);
+  applySort();
+  renderSortPanel();
+  renderSortArrows();
+}
+
+function resetAllSort() {
+  sortConditions = [];
+  renderSortPanel();
+  renderSortArrows();
+  showToast('ソートをリセットしました');
+}
+
+function renderSortPanel() {
+  const container = document.getElementById('sortKeys');
+  const empty     = document.getElementById('sortEmpty');
+  if (!sortConditions.length) {
+    container.innerHTML = '';
+    if (empty) { empty.style.display = ''; container.appendChild(empty); }
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  container.innerHTML = sortConditions.map((c, i) => `
+    <div class="sort-key-chip">
+      <span class="chip-num">${i+1}</span>
+      ${SORT_LABELS[c.key]}
+      <span class="chip-dir">${c.dir === 'asc' ? '▲' : '▼'}</span>
+      <button class="chip-del" onclick="removeSortKey('${c.key}')" title="削除">×</button>
+    </div>
+  `).join('');
+}
+
+function renderSortArrows() {
+  // 全矢印をリセット
+  ['type','name','kana','alpha','size','qty'].forEach(k => {
+    ['a','d'].forEach(d => {
+      const el = document.getElementById(`arr-${k}-${d}`);
+      if (el) el.classList.remove('active-arr');
+    });
+  });
+  // アクティブな条件を反映
+  sortConditions.forEach(({ key, dir }) => {
+    const el = document.getElementById(`arr-${key}-${dir === 'asc' ? 'a' : 'd'}`);
+    if (el) el.classList.add('active-arr');
+  });
+}
+
+function resetSortArrows() { renderSortArrows(); }
+
+/* ============================================================
+   CONFIRM MODAL
+   ============================================================ */
+let _pendingPayload = null;
+
+function closeModal() {
+  document.getElementById('confirmModal').classList.remove('show');
+  _pendingPayload = null;
+}
+
+async function submitForm() {
+  // ---- バリデーション ----
+  const rows = document.querySelectorAll('.order-row');
+  let hasError = false;
+  rows.forEach(row => {
+    const id = row.dataset.id;
+    if (!document.getElementById(`type_${id}`)?.value ||
+        !document.getElementById(`size_${id}`)?.value) hasError = true;
+  });
+  if (hasError) { showToast('種類・色 と サイズ をすべて選択してください', 'warn'); return; }
+
+  const customerName = document.getElementById('customerName').value.trim();
+  if (!customerName) { showToast('お客様名を入力してください', 'warn'); return; }
+
+  // ---- 送信データ組み立て ----
+  const entries = buildExcelRows();
+  const total   = entries.reduce((s, e) => s + e.qty, 0);
+  const lines   = entries.map(e => {
+    const namePart = e.nameYn === 'あり' ? `  ネーム: ${e.nameKana}（${e.nameAlpha}）` : '';
+    return `・${e.type}  ${e.nameYn}${namePart}  サイズ: ${e.size}  ${e.qty}枚`;
+  });
+
+  // CSVデータを文字列として組み立てGASに渡す
+  const escape = v => `"${String(v).replace(/"/g, '""')}"`;
+  const header = ['種類・色','ネーム有無','ネーム（ひらがな）','ネーム（アルファベット）','サイズ','数量（枚）'];
+  const csvRows = [
+    header.map(escape).join(','),
+    ...entries.map(e => [e.type, e.nameYn, e.nameKana, e.nameAlpha, e.size, e.qty].map(escape).join(','))
+  ];
+  const csvStr = csvRows.join('\r\n');
+
+  _pendingPayload = {
+    customerName,
+    lines,
+    total,
+    csvStr,
+    sentAt: new Date().toLocaleString('ja-JP'),
+  };
+
+  // ---- 確認モーダルを表示 ----
+  document.getElementById('confirmModalBody').innerHTML = `
+    <strong>${customerName}</strong> 様のオーダーをメールで送信します。<br>
+    合計 <strong>${total}枚</strong>（${entries.length}件）のデータとCSVファイルが添付されます。
+  `;
+  document.getElementById('confirmModal').classList.add('show');
+}
+
+async function doSend() {
+  if (!_pendingPayload) return;
+  const payload = _pendingPayload;
+  closeModal();
+
+  const btn = document.querySelector('.btn-submit');
+  btn.disabled    = true;
+  btn.textContent = '送信中…';
+
+  try {
+    const params = new URLSearchParams({
+      customerName: payload.customerName,
+      lines:        JSON.stringify(payload.lines),
+      total:        payload.total,
+      csvStr:       payload.csvStr,
+      sentAt:       payload.sentAt,
+    });
+
+    await fetch(GAS_URL + '?' + params.toString(), {
+      method: 'GET',
+      mode:   'no-cors',
+    });
+
+    document.getElementById('submitSuccess').style.display = 'block';
+    document.getElementById('submitSuccess').scrollIntoView({ behavior: 'smooth' });
+    showToast('✓ 送信が完了しました！', 'success');
+
+  } catch (err) {
+    console.error(err);
+    showToast('送信に失敗しました。時間をおいて再試行してください', 'warn');
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = '✉ 送　信';
+  }
+}
 /* ============================================================
    SUMMARY
    指定表示順：
