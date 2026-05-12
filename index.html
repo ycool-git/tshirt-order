@@ -1369,11 +1369,11 @@ async function submitForm() {
   });
 
   // CSVデータを文字列として組み立てGASに渡す
-  const escape = v => `"${String(v).replace(/"/g, '""')}"`;
+  const csvEscape = v => `"${String(v).replace(/"/g, '""')}"`;
   const header = ['種類・色','ネーム有無','ネーム（ひらがな）','ネーム（アルファベット）','サイズ','数量（枚）'];
   const csvRows = [
-    header.map(escape).join(','),
-    ...entries.map(e => [e.type, e.nameYn, e.nameKana, e.nameAlpha, e.size, e.qty].map(escape).join(','))
+    header.map(csvEscape).join(','),
+    ...entries.map(e => [e.type, e.nameYn, e.nameKana, e.nameAlpha, e.size, e.qty].map(csvEscape).join(','))
   ];
   const csvStr = csvRows.join('\r\n');
 
@@ -1578,13 +1578,13 @@ function downloadExcel() {
 
   // BOM付きCSV（Excelで文字化けしない）
   const header = ['種類・色', 'ネーム有無', 'ネーム（ひらがな）', 'ネーム（アルファベット）', 'サイズ', '数量（枚）'];
-  const escape = v => `"${String(v).replace(/"/g, '""')}"`;
+  const csvEscape = v => `"${String(v).replace(/"/g, '""')}"`;
 
   const csvRows = [
-    header.map(escape).join(','),
+    header.map(csvEscape).join(','),
     ...entries.map(e => [
       e.type, e.nameYn, e.nameKana, e.nameAlpha, e.size, e.qty
-    ].map(escape).join(','))
+    ].map(csvEscape).join(','))
   ];
 
   const bom  = '\uFEFF';
