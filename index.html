@@ -1380,6 +1380,7 @@ async function submitForm() {
 
   _pendingPayload = {
     customerName: customerName,
+    entries: entries,
     lines: lines,
     total: total,
     csvStr: csvStr,
@@ -1405,7 +1406,7 @@ async function doSend() {
   try {
     const params = new URLSearchParams({
       customerName: payload.customerName,
-      lines:        JSON.stringify(payload.lines),
+      entries:      JSON.stringify(payload.entries),
       total:        payload.total,
       sentAt:       payload.sentAt,
     });
