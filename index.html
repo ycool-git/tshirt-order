@@ -1364,32 +1364,32 @@ async function submitForm() {
   const entries = buildExcelRows();
   const total   = entries.reduce((s, e) => s + e.qty, 0);
   const lines   = entries.map(e => {
-    const namePart = e.nameYn === 'あり' ? `  ネーム: ${e.nameKana}（${e.nameAlpha}）` : '';
-    return `・${e.type}  ${e.nameYn}${namePart}  サイズ: ${e.size}  ${e.qty}枚`;
+    const namePart = e.nameYn === 'あり' ? '  ネーム: ' + e.nameKana + '(' + e.nameAlpha + ')' : '';
+    return e.type + '  ' + e.nameYn + namePart + '  サイズ: ' + e.size + '  ' + e.qty + '枚';
   });
 
-  // CSVデータを文字列として組み立てGASに渡す
-  const csvEscape = v => `"${String(v).replace(/"/g, '""')}"`;
+  // CSVデータ組み立て（バックティック不使用）
+  const csvEscape = function(v) { return '"' + String(v).replace(/"/g, '""') + '"'; };
   const header = ['種類・色','ネーム有無','ネーム（ひらがな）','ネーム（アルファベット）','サイズ','数量（枚）'];
-  const csvRows = [
-    header.map(csvEscape).join(','),
-    ...entries.map(e => [e.type, e.nameYn, e.nameKana, e.nameAlpha, e.size, e.qty].map(csvEscape).join(','))
-  ];
+  const csvRows = [header.map(csvEscape).join(',')].concat(
+    entries.map(function(e) {
+      return [e.type, e.nameYn, e.nameKana, e.nameAlpha, e.size, e.qty].map(csvEscape).join(',');
+    })
+  );
   const csvStr = csvRows.join('\r\n');
 
   _pendingPayload = {
-    customerName,
-    lines,
-    total,
-    csvStr,
+    customerName: customerName,
+    lines: lines,
+    total: total,
+    csvStr: csvStr,
     sentAt: new Date().toLocaleString('ja-JP'),
   };
 
   // ---- 確認モーダルを表示 ----
-  document.getElementById('confirmModalBody').innerHTML = `
-    <strong>${customerName}</strong> 様のオーダーをメールで送信します。<br>
-    合計 <strong>${total}枚</strong>（${entries.length}件）のデータとCSVファイルが添付されます。
-  `;
+  document.getElementById('confirmModalBody').innerHTML =
+    '<strong>' + customerName + '</strong> 様のオーダーをメールで送信します。<br>' +
+    '合計 <strong>' + total + '枚</strong>（' + entries.length + '件）のデータとCSVファイルが添付されます。';
   document.getElementById('confirmModal').classList.add('show');
 }
 
