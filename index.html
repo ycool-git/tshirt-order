@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tシャツ オーダーフォーム</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Oswald:wght@600;700&display=swap');
+
+:root {
+  --red: #c0392b;
+  --red2: #e74c3c;
+  --ink: #1c1c1c;
+  --mid: #555;
+  --soft: #999;
+  --border: #d0cac8;
+  --bg: #f2ede9;
+  --card: #ffffff;
+  --field-bg: #faf8f7;
+  --green: #27ae60;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  padding: 32px 16px 80px;
+  color: var(--ink);
+}
+
+/* ======== HEADER ======== */
+.page-header {
+  max-width: 860px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+.page-header h1 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--red);
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+.page-header .jp-title {
+  font-size: 0.78rem;
+  color: var(--soft);
+  letter-spacing: 0.08em;
+  padding-bottom: 2px;
+}
+
+/* ======== MAIN CARD ======== */
+.card {
+  max-width: 860px;
+  margin: 0 auto;
+  background: var(--card);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  overflow: visible;
+}
+
+/* ======== TABLE HEADER (赤帯) ======== */
+.tbl-head {
+  display: grid;
+  /* No. | 種類 | ネーム有無 | ひらがな | アルファベット | サイズ | 数量 | 操作 */
+  grid-template-columns: 32px 2fr 0.9fr 1.15fr 1.4fr 0.85fr 0.75fr 72px;
+  background: var(--red);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: 6px 6px 0 0;
+  overflow: hidden; /* clip child borders */
+}
+
+.tbl-head-cell {
+  padding: 0 8px;
+  height: 38px;
+  border-right: 1px solid rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  line-height: 1.25;
+  text-align: center;
+  position: relative;
+  white-space: nowrap;
+}
+.tbl-head-cell:last-child { border-right: none; }
+
+/* ---- Sort button inside header cell ---- */
+.sort-icon-btn {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 3px;
+  transition: background 0.12s;
+  background: none;
+  border: none;
+  line-height: 1;
+}
+.sort-icon-btn:hover { background: rgba(255,255,255,0.18); }
+.sort-icon-btn .arr { font-size: 0.6rem; color: rgba(255,255,255,0.6); line-height: 1; display: block; }
+.sort-icon-btn .arr.active-arr { color: #fff; }
+
+/* tooltip on header sort btn */
+.sort-icon-btn[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #222;
+  color: #fff;
+  font-size: 0.68rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 100;
+  pointer-events: none;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+
+/* ======== ROWS ======== */
+.rows-container { padding: 10px 10px 4px; }
+
+.order-row {
+  display: grid;
+  grid-template-columns: 32px 2fr 0.9fr 1.15fr 1.4fr 0.85fr 0.75fr 72px;
+  gap: 5px;
+  align-items: center;
+  margin-bottom: 7px;
+  background: var(--field-bg);
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  padding: 7px 8px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.order-row:hover {
+  border-color: #c0b0ae;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.order-row.dragging { opacity: 0.4; border-color: var(--red); }
+.order-row.drag-over {
+  border-color: var(--red);
+  box-shadow: 0 0 0 2px rgba(192,57,43,0.2);
+}
+
+/* drag handle / row number */
+.row-num {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--soft);
+  text-align: center;
+  cursor: grab;
+  user-select: none;
+  line-height: 1.2;
+}
+.row-num .drag-dots {
+  display: block;
+  font-size: 1rem;
+  color: var(--border);
+  line-height: 0.75;
+  margin-bottom: 1px;
+}
+.row-num:active { cursor: grabbing; }
+
+/* fields */
+.field select,
+.field input[type="text"],
+.field input[type="number"] {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 7px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.81rem;
+  color: var(--ink);
+  background: white;
+  outline: none;
+  transition: border-color 0.15s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.field select:focus,
+.field input:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 2px rgba(192,57,43,0.12);
+}
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 7px center;
+  padding-right: 20px;
+  cursor: pointer;
+}
+.field input[type="number"] { text-align: center; }
+.field input:disabled,
+.field select:disabled {
+  background: #f0eeec;
+  color: #bbb;
+  border-color: #e4dfdd;
+  cursor: not-allowed;
+}
+
+/* ---- 複製ボタン ---- */
+.row-btns {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 複製 text button */
+.btn-copy-text {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #2980b9;
+  background: #edf5fb;
+  border: 1.5px solid #aacde8;
+  border-radius: 4px;
+  padding: 4px 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.12s;
+  position: relative;
+}
+.btn-copy-text:hover {
+  background: #daeaf7;
+  border-color: #2980b9;
+}
+
+/* tooltip for 複製 */
+.btn-copy-text::after {
+  content: '内容をコピーして追加します';
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #222;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 400;
+  padding: 5px 9px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 200;
+}
+.btn-copy-text:hover::after { opacity: 1; }
+
+/* 削除ボタン */
+.btn-del {
+  width: 26px; height: 26px;
+  border-radius: 4px;
+  border: 1.5px solid var(--border);
+  background: white;
+  cursor: pointer;
+  font-size: 0.82rem;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--soft);
+  padding: 0;
+  transition: all 0.12s;
+}
+.btn-del:hover { border-color: var(--red); color: var(--red); background: #fff5f4; }
+
+/* ======== ADD ROW ======== */
+.add-row-area { padding: 6px 10px 12px; }
+.btn-add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 2px dashed var(--border);
+  border-radius: 5px;
+  width: 100%;
+  padding: 9px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.82rem;
+  color: var(--soft);
+  cursor: pointer;
+  transition: all 0.15s;
+  justify-content: center;
+}
+.btn-add:hover {
+  border-color: var(--red);
+  color: var(--red);
+  background: #fff8f7;
+}
+
+/* ======== SAVE INDICATOR ======== */
+.meta-bar {
+  max-width: 860px;
+  margin: 14px auto 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.save-indicator {
+  font-size: 0.72rem;
+  color: var(--soft);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.save-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 0.3s;
+}
+.save-dot.saved   { background: var(--green); }
+.save-dot.unsaved { background: #e67e22; }
+
+/* ======== SUMMARY ======== */
+.summary-section {
+  max-width: 860px;
+  margin: 20px auto 0;
+  background: var(--card);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  padding: 20px 24px;
+}
+.section-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--red);
+  letter-spacing: 0.1em;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1.5px;
+  background: #f0d4d0;
+}
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+.summary-table th {
+  text-align: left;
+  font-size: 0.72rem;
+  color: var(--soft);
+  font-weight: 500;
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.summary-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #f0ece9;
+}
+.summary-table td:last-child {
+  text-align: right;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.summary-total-row td {
+  border-top: 2px solid var(--red);
+  border-bottom: none;
+  color: var(--red);
+  font-weight: 900;
+  font-size: 1rem;
+  padding-top: 10px;
+}
+
+/* ======== CUSTOMER NAME BAR ======== */
+.customer-bar {
+  max-width: 860px;
+  margin: 20px auto 0;
+  background: var(--card);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.customer-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--red);
+  white-space: nowrap;
+}
+.customer-input {
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  padding: 7px 10px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.84rem;
+  color: var(--ink);
+  outline: none;
+  width: 200px;
+  transition: border-color 0.15s;
+}
+.customer-input:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 2px rgba(192,57,43,0.12);
+}
+.customer-note {
+  font-size: 0.72rem;
+  color: var(--soft);
+}
+
+/* ======== SUBMIT SUCCESS ======== */
+.submit-success {
+  display: none;
+  max-width: 860px;
+  margin: 16px auto 0;
+  background: #eaf7ee;
+  border: 1.5px solid #6fcf97;
+  border-radius: 6px;
+  padding: 14px 20px;
+  color: #1a7a40;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ======== BOTTOM ACTIONS ======== */
+.bottom-actions {
+  max-width: 860px;
+  margin: 20px auto 0;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+.left-actions  { display: flex; gap: 8px; flex-wrap: wrap; }
+.right-actions { display: flex; gap: 8px; }
+
+.btn-save, .btn-load, .btn-clear {  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.82rem;
+  border: 2px solid var(--border);
+  background: white;
+  border-radius: 4px;
+  padding: 10px 18px;
+  cursor: pointer;
+  color: var(--mid);
+  font-weight: 500;
+  transition: all 0.12s;
+}
+.btn-save:hover  { border-color: var(--green); color: var(--green); background: #f0faf4; }
+.btn-load:hover  { border-color: #2980b9; color: #2980b9; background: #edf5fb; }
+.btn-clear:hover { border-color: #aaa; color: #666; }
+
+.btn-excel {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.82rem;
+  border: 2px solid #27ae60;
+  background: white;
+  border-radius: 4px;
+  padding: 10px 18px;
+  cursor: pointer;
+  color: #27ae60;
+  font-weight: 700;
+  transition: all 0.12s;
+}
+.btn-excel:hover { background: #eaf7ee; }
+
+.btn-submit {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  background: var(--red);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 11px 40px;
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  box-shadow: 0 3px 0 #8b2020;
+  transition: all 0.12s;
+}
+.btn-submit:hover {
+  background: var(--red2);
+  box-shadow: 0 2px 0 #8b2020;
+  transform: translateY(1px);
+}
+
+/* ======== TOAST ======== */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #1c1c1c;
+  color: white;
+  padding: 11px 22px;
+  border-radius: 6px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  z-index: 9999;
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s;
+  opacity: 0;
+  white-space: nowrap;
+}
+.toast.show  { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast.success { background: var(--green); }
+.toast.warn    { background: #e67e22; }
+
+/* ======== RESPONSIVE (tablet / mobile) ======== */
+@media (max-width: 700px) {
+  .tbl-head { display: none; }
+
+  .order-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    gap: 6px;
+    padding: 10px;
+  }
+
+  /* row number / drag handle spans full width at top */
+  .row-num {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    cursor: grab;
+  }
+  .row-num .drag-dots { display: inline; margin-bottom: 0; font-size: 1rem; }
+
+  /* each field takes half width by default */
+  .field { grid-column: span 1; }
+
+  /* ひらがな・アルファベット: full width on mobile so keyboard hint works nicely */
+  .field.f-kana,
+  .field.f-alpha { grid-column: 1 / -1; }
+
+  /* action buttons at bottom */
+  .row-btns { grid-column: 1 / -1; justify-content: flex-end; }
+
+  .bottom-actions { flex-direction: column; }
+  .left-actions, .right-actions { width: 100%; }
+  .btn-submit { width: 100%; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>T-SHIRT ORDER FORM</h1>
+  <span class="jp-title">Tシャツ オーダーフォーム</span>
+</div>
+
+<!-- Main card -->
+<div class="card">
+
+  <!-- 赤帯ヘッダー（ソートアイコン入り） -->
+  <div class="tbl-head" id="tblHead">
+    <div class="tbl-head-cell">No.</div>
+    <div class="tbl-head-cell">
+      種類・色
+      <button class="sort-icon-btn" id="sort-type" title="種類順に並び替え" onclick="sortRows('type',this)">
+        <span class="arr" id="arr-type-a">▲</span>
+        <span class="arr" id="arr-type-d">▼</span>
+      </button>
+    </div>
+    <div class="tbl-head-cell">ネーム有無</div>
+    <div class="tbl-head-cell">ネーム（ひらがな）</div>
+    <div class="tbl-head-cell">ネーム（アルファベット）</div>
+    <div class="tbl-head-cell">
+      サイズ
+      <button class="sort-icon-btn" id="sort-size" title="サイズ順に並び替え" onclick="sortRows('size',this)">
+        <span class="arr" id="arr-size-a">▲</span>
+        <span class="arr" id="arr-size-d">▼</span>
+      </button>
+    </div>
+    <div class="tbl-head-cell">
+      数量
+      <button class="sort-icon-btn" id="sort-qty" title="数量順に並び替え" onclick="sortRows('qty',this)">
+        <span class="arr" id="arr-qty-a">▲</span>
+        <span class="arr" id="arr-qty-d">▼</span>
+      </button>
+    </div>
+    <div class="tbl-head-cell">操作</div>
+  </div>
+
+  <div class="rows-container" id="rowsContainer"></div>
+
+  <div class="add-row-area">
+    <button class="btn-add" onclick="addRow()">＋ 行を追加</button>
+  </div>
+</div>
+
+<!-- save indicator -->
+<div class="meta-bar">
+  <div class="save-indicator">
+    <div class="save-dot" id="saveDot"></div>
+    <span id="saveStatus">未保存</span>
+  </div>
+</div>
+
+<!-- 集計 -->
+<div class="summary-section">
+  <div class="section-title">集　計</div>
+  <table class="summary-table">
+    <thead>
+      <tr>
+        <th>種類・色</th>
+        <th>ネーム</th>
+        <th>サイズ</th>
+        <th>枚数</th>
+      </tr>
+    </thead>
+    <tbody id="summaryBody"></tbody>
+    <tfoot id="summaryFoot"></tfoot>
+  </table>
+</div>
+
+<!-- お客様名入力 -->
+<div class="customer-bar">
+  <label class="customer-label" for="customerName">お客様名</label>
+  <input type="text" id="customerName" class="customer-input"
+    placeholder="例：山田 太郎" oninput="markUnsaved()">
+  <span class="customer-note">送信メールとExcelファイル名に使用されます</span>
+</div>
+
+<!-- ボタン -->
+<div class="bottom-actions">
+  <div class="left-actions">
+    <button class="btn-save"  onclick="saveData()">💾 保存</button>
+    <button class="btn-load"  onclick="loadData()">📂 読み込み</button>
+    <button class="btn-clear" onclick="clearAll()">🗑 リセット</button>
+  </div>
+  <div class="right-actions">
+    <button class="btn-excel"  onclick="downloadExcel()">📥 Excelダウンロード</button>
+    <button class="btn-submit" onclick="submitForm()">✉ 送　信</button>
+  </div>
+</div>
+
+<!-- 送信完了バナー -->
+<div class="submit-success" id="submitSuccess">
+  ✓ 送信が完了しました！ご注文ありがとうございます。
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   DATA
+   ============================================================ */
+const PRODUCT_MAP = {
+  '白Tシャツ':    { nameOk: true  },
+  '黒Tシャツ':    { nameOk: true  },
+  '黒ポロシャツ': { nameOk: false },
+};
+const PRODUCTS = Object.keys(PRODUCT_MAP);
+const SIZES    = ['S','M','L','XL','XXL','XXXL'];
+const SAVE_KEY = 'tshirt_order_v3';
+
+let rowId   = 0;
+let isDirty = false;
+
+// sort state: { key: 'type'|'size'|'qty', dir: 'asc'|'desc' }
+let sortState = null;
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  void t.offsetWidth;
+  requestAnimationFrame(() => t.classList.add('show'));
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ============================================================
+   SAVE / LOAD
+   ============================================================ */
+function markUnsaved() {
+  isDirty = true;
+  document.getElementById('saveDot').className    = 'save-dot unsaved';
+  document.getElementById('saveStatus').textContent = '未保存';
+}
+function markSaved() {
+  isDirty = false;
+  document.getElementById('saveDot').className    = 'save-dot saved';
+  document.getElementById('saveStatus').textContent = '保存済み';
+}
+
+function collectData() {
+  const rows = [];
+  document.querySelectorAll('.order-row').forEach(row => {
+    const id = row.dataset.id;
+    rows.push({
+      type:       document.getElementById(`type_${id}`)?.value      || '',
+      name_yn:    document.getElementById(`name_yn_${id}`)?.value   || 'なし',
+      name_kana:  document.getElementById(`name_kana_${id}`)?.value || '',
+      name_alpha: document.getElementById(`name_alpha_${id}`)?.value|| '',
+      size:       document.getElementById(`size_${id}`)?.value      || '',
+      qty:        parseInt(document.getElementById(`qty_${id}`)?.value) || 1,
+    });
+  });
+  return {
+    rows,
+    customerName: document.getElementById('customerName')?.value || '',
+  };
+}
+
+function saveData() {
+  const data = collectData();
+  localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  markSaved();
+  showToast('💾 保存しました', 'success');
+}
+
+function loadData() {
+  const raw = localStorage.getItem(SAVE_KEY);
+  if (!raw) { showToast('保存データが見つかりません', 'warn'); return; }
+  const data = JSON.parse(raw);
+  document.getElementById('rowsContainer').innerHTML = '';
+  rowId = 0;
+  (data.rows || []).forEach(r => addRow(r));
+  if (data.customerName) document.getElementById('customerName').value = data.customerName;
+  markSaved();
+  showToast('📂 読み込みました', 'success');
+}
+
+function clearAll() {
+  if (!confirm('すべての入力をリセットしますか？')) return;
+  document.getElementById('rowsContainer').innerHTML = '';
+  rowId = 0;
+  addRow();
+  sortState = null;
+  resetSortArrows();
+  markUnsaved();
+  updateSummary();
+  showToast('リセットしました');
+}
+
+/* ============================================================
+   ROW CREATION
+   ============================================================ */
+function addRow(data = null) {
+  rowId++;
+  const id = rowId;
+  const container = document.getElementById('rowsContainer');
+  const div = document.createElement('div');
+  div.className  = 'order-row';
+  div.dataset.id = id;
+  div.draggable  = true;
+
+  const typeVal  = data?.type      || '';
+  const nameVal  = data?.name_yn   || 'なし';
+  const kanaVal  = data?.name_kana || '';
+  const alphaVal = data?.name_alpha|| '';
+  const sizeVal  = data?.size      || '';
+  const qtyVal   = data?.qty       ?? 1;
+
+  const nameOkForType = typeVal ? (PRODUCT_MAP[typeVal]?.nameOk !== false) : true;
+  const nameDisabled  = !nameOkForType || nameVal !== 'あり';
+
+  const prodOpts = PRODUCTS.map(p =>
+    `<option value="${p}"${typeVal===p?' selected':''}>${p}</option>`
+  ).join('');
+
+  const nameYnDisabled = !nameOkForType ? 'disabled' : '';
+  const nameYnOpts = `
+    <option value="なし"${nameVal==='なし'?' selected':''}>なし</option>
+    <option value="あり"${nameVal==='あり'?' selected':''}>あり</option>`;
+
+  const sizeOpts = SIZES.map(s =>
+    `<option value="${s}"${sizeVal===s?' selected':''}>${s}</option>`
+  ).join('');
+
+  div.innerHTML = `
+    <div class="row-num" title="ドラッグで並び替え">
+      <span class="drag-dots">⠿</span>
+      <span class="num-label">${document.querySelectorAll('.order-row').length + 1}</span>
+    </div>
+
+    <div class="field">
+      <select id="type_${id}" onchange="onTypeChange(this,${id})" oninput="markUnsaved()">
+        <option value="">選択してください</option>
+        ${prodOpts}
+      </select>
+    </div>
+
+    <div class="field">
+      <select id="name_yn_${id}" onchange="onNameYnChange(this,${id})" oninput="markUnsaved()" ${nameYnDisabled}>
+        ${nameYnOpts}
+      </select>
+    </div>
+
+    <div class="field f-kana">
+      <input type="text"
+        id="name_kana_${id}"
+        value="${kanaVal}"
+        inputmode="hiragana"
+        lang="ja"
+        autocomplete="off"
+        oninput="markUnsaved()"
+        ${nameDisabled ? 'disabled' : ''}>
+    </div>
+
+    <div class="field f-alpha">
+      <input type="text"
+        id="name_alpha_${id}"
+        value="${alphaVal}"
+        inputmode="text"
+        autocapitalize="characters"
+        autocomplete="off"
+        oninput="markUnsaved()"
+        ${nameDisabled ? 'disabled' : ''}>
+    </div>
+
+    <div class="field">
+      <select id="size_${id}" oninput="markUnsaved();updateSummary()">
+        <option value="">-</option>
+        ${sizeOpts}
+      </select>
+    </div>
+
+    <div class="field">
+      <input type="number" id="qty_${id}" value="${qtyVal}" min="1" max="999"
+        inputmode="numeric"
+        oninput="markUnsaved();updateSummary()">
+    </div>
+
+    <div class="row-btns">
+      <button class="btn-copy-text" onclick="copyRow(${id})">複製</button>
+      <button class="btn-del" title="削除" onclick="deleteRow(${id})">✕</button>
+    </div>
+  `;
+
+  container.appendChild(div);
+  setupDrag(div);
+  updateRowNumbers();
+  updateSummary();
+  markUnsaved();
+}
+
+/* ============================================================
+   COPY ROW
+   ============================================================ */
+function copyRow(id) {
+  addRow({
+    type:       document.getElementById(`type_${id}`)?.value       || '',
+    name_yn:    document.getElementById(`name_yn_${id}`)?.value    || 'なし',
+    name_kana:  document.getElementById(`name_kana_${id}`)?.value  || '',
+    name_alpha: document.getElementById(`name_alpha_${id}`)?.value || '',
+    size:       document.getElementById(`size_${id}`)?.value       || '',
+    qty:        parseInt(document.getElementById(`qty_${id}`)?.value) || 1,
+  });
+  showToast('複製しました');
+}
+
+/* ============================================================
+   CHANGE HANDLERS
+   ============================================================ */
+function onTypeChange(sel, id) {
+  const product = sel.value;
+  const nameOk  = product ? PRODUCT_MAP[product]?.nameOk !== false : true;
+  const nameYnSel = document.getElementById(`name_yn_${id}`);
+  if (!nameOk) {
+    nameYnSel.value    = 'なし';
+    nameYnSel.disabled = true;
+  } else {
+    nameYnSel.disabled = false;
+  }
+  disableNameFields(id, !nameOk || nameYnSel.value !== 'あり');
+  updateSummary();
+  markUnsaved();
+}
+
+function onNameYnChange(sel, id) {
+  disableNameFields(id, sel.value !== 'あり');
+  markUnsaved();
+}
+
+function disableNameFields(id, disabled) {
+  const kana  = document.getElementById(`name_kana_${id}`);
+  const alpha = document.getElementById(`name_alpha_${id}`);
+  if (kana)  kana.disabled  = disabled;
+  if (alpha) alpha.disabled = disabled;
+}
+
+/* ============================================================
+   DELETE / ROW NUMBERS
+   ============================================================ */
+function deleteRow(id) {
+  const rows = document.querySelectorAll('.order-row');
+  if (rows.length <= 1) { showToast('1行以上必要です', 'warn'); return; }
+  document.querySelector(`.order-row[data-id="${id}"]`)?.remove();
+  updateRowNumbers();
+  updateSummary();
+  markUnsaved();
+}
+
+function updateRowNumbers() {
+  document.querySelectorAll('.order-row').forEach((row, i) => {
+    const lbl = row.querySelector('.num-label');
+    if (lbl) lbl.textContent = i + 1;
+  });
+}
+
+/* ============================================================
+   DRAG AND DROP  — マウス・タッチ共通
+   ドラッグ元行を半透明にし、通過した行の上下に挿入マーカーを出す
+   ============================================================ */
+let dragSrc    = null;
+let touchClone = null;
+let touchOffX  = 0;
+let touchOffY  = 0;
+
+/* ---- ドロップ実行（共通） ---- */
+function performDrop(target) {
+  if (!dragSrc || dragSrc === target) return;
+  const c   = document.getElementById('rowsContainer');
+  const all = [...c.querySelectorAll('.order-row')];
+  const si  = all.indexOf(dragSrc);
+  const ti  = all.indexOf(target);
+  if (si < ti) c.insertBefore(dragSrc, target.nextSibling);
+  else         c.insertBefore(dragSrc, target);
+}
+
+/* ---- ドラッグ後のクリーンアップ ---- */
+function cleanupDrag() {
+  document.querySelectorAll('.order-row').forEach(r => {
+    r.classList.remove('drag-over', 'dragging');
+  });
+  if (touchClone) { touchClone.remove(); touchClone = null; }
+  updateRowNumbers();
+  updateSummary();
+  markUnsaved();
+  dragSrc = null;
+}
+
+/* ---- 各行のイベント登録 ---- */
+function setupDrag(div) {
+  const handle = div.querySelector('.row-num');
+  if (!handle) return;
+
+  /* ===== マウス drag-and-drop ===== */
+  // draggable は行全体に付けるが、開始はハンドル操作のみに限定
+  handle.addEventListener('mousedown', () => { div.draggable = true; });
+  div.addEventListener('dragstart', e => {
+    dragSrc = div;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', ''); // Firefox必須
+    setTimeout(() => div.classList.add('dragging'), 0);
+  });
+  div.addEventListener('dragend', () => { cleanupDrag(); });
+
+  div.addEventListener('dragover', e => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    document.querySelectorAll('.order-row').forEach(r => r.classList.remove('drag-over'));
+    if (div !== dragSrc) div.classList.add('drag-over');
+  });
+  div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
+  div.addEventListener('drop', e => {
+    e.preventDefault();
+    performDrop(div);
+    // dragend で cleanupDrag が呼ばれる
+  });
+
+  // mouseup でdraggable を false に戻し、クリック系誤作動を防ぐ
+  document.addEventListener('mouseup', () => { div.draggable = false; }, { once: false });
+
+  /* ===== タッチ drag (iOS / Android) ===== */
+  handle.addEventListener('touchstart', e => {
+    if (['SELECT','INPUT','BUTTON'].includes(e.target.tagName)) return;
+    dragSrc = div;
+
+    const touch = e.touches[0];
+    const rect  = div.getBoundingClientRect();
+    touchOffX   = touch.clientX - rect.left;
+    touchOffY   = touch.clientY - rect.top;
+
+    // 幽霊コピーを作成
+    touchClone = div.cloneNode(true);
+    Object.assign(touchClone.style, {
+      position:      'fixed',
+      left:          rect.left + 'px',
+      top:           rect.top  + 'px',
+      width:         rect.width + 'px',
+      opacity:       '0.72',
+      pointerEvents: 'none',
+      zIndex:        '9500',
+      boxShadow:     '0 8px 28px rgba(0,0,0,0.22)',
+      borderColor:   '#c0392b',
+      borderRadius:  '5px',
+      margin:        '0',
+    });
+    document.body.appendChild(touchClone);
+    div.classList.add('dragging');
+    e.preventDefault();
+  }, { passive: false });
+
+  handle.addEventListener('touchmove', e => {
+    if (!dragSrc || !touchClone) return;
+    const touch = e.touches[0];
+
+    // 幽霊を指に追従させる
+    touchClone.style.left = (touch.clientX - touchOffX) + 'px';
+    touchClone.style.top  = (touch.clientY - touchOffY) + 'px';
+
+    // 幽霊を一時的に非表示にして真下の要素を取得
+    touchClone.style.visibility = 'hidden';
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    touchClone.style.visibility = '';
+
+    document.querySelectorAll('.order-row').forEach(r => r.classList.remove('drag-over'));
+    const target = el?.closest('.order-row');
+    if (target && target !== dragSrc) target.classList.add('drag-over');
+    e.preventDefault();
+  }, { passive: false });
+
+  handle.addEventListener('touchend', e => {
+    if (!dragSrc) return;
+    const touch = e.changedTouches[0];
+
+    // 幽霊を隠して drop 先を取得
+    if (touchClone) touchClone.style.visibility = 'hidden';
+    const el     = document.elementFromPoint(touch.clientX, touch.clientY);
+    const target = el?.closest('.order-row');
+    if (target && target !== dragSrc) performDrop(target);
+
+    cleanupDrag();
+  }, { passive: true });
+}
+
+/* ============================================================
+   SORT (column header icons)
+   ============================================================ */
+const SIZE_ORDER = { 'S':0,'M':1,'L':2,'XL':3,'XXL':4,'XXXL':5 };
+
+function resetSortArrows() {
+  ['type','size','qty'].forEach(k => {
+    const a = document.getElementById(`arr-${k}-a`);
+    const d = document.getElementById(`arr-${k}-d`);
+    if (a) { a.classList.remove('active-arr'); }
+    if (d) { d.classList.remove('active-arr'); }
+  });
+}
+
+function sortRows(key, btnEl) {
+  // toggle direction
+  let dir = 'asc';
+  if (sortState && sortState.key === key) {
+    dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+  }
+  sortState = { key, dir };
+
+  const container = document.getElementById('rowsContainer');
+  const rows = [...container.querySelectorAll('.order-row')];
+
+  const getVal = (row) => {
+    const id = row.dataset.id;
+    switch (key) {
+      case 'type': return PRODUCTS.indexOf(document.getElementById(`type_${id}`)?.value ?? '');
+      case 'size': return SIZE_ORDER[document.getElementById(`size_${id}`)?.value] ?? 99;
+      case 'qty':  return parseInt(document.getElementById(`qty_${id}`)?.value) || 0;
+      default:     return 0;
+    }
+  };
+
+  rows.sort((a, b) => {
+    const diff = getVal(a) - getVal(b);
+    return dir === 'asc' ? diff : -diff;
+  });
+  rows.forEach(r => container.appendChild(r));
+  updateRowNumbers();
+  markUnsaved();
+
+  // update arrow highlights
+  resetSortArrows();
+  const activeArrow = document.getElementById(`arr-${key}-${dir === 'asc' ? 'a' : 'd'}`);
+  if (activeArrow) activeArrow.classList.add('active-arr');
+
+  showToast('ソートしました');
+}
+
+/* ============================================================
+   SUMMARY
+   指定表示順：
+     ① 白Tシャツ　ネームあり  → サイズ順（S→XXXL）
+     ② 黒Tシャツ　ネームあり  → サイズ順
+     ③ 白Tシャツ　ネームなし  → サイズ順（同サイズは数量合算）
+     ④ 黒Tシャツ　ネームなし  → サイズ順（同上）
+     ⑤ 黒ポロシャツ ネームなし → サイズ順（同上）
+   ============================================================ */
+const SUMMARY_ORDER = [
+  { type: '白Tシャツ',    nameYn: 'あり' },
+  { type: '黒Tシャツ',    nameYn: 'あり' },
+  { type: '白Tシャツ',    nameYn: 'なし' },
+  { type: '黒Tシャツ',    nameYn: 'なし' },
+  { type: '黒ポロシャツ', nameYn: 'なし' },
+];
+
+function summaryGroupKey(type, nameYn) {
+  const idx = SUMMARY_ORDER.findIndex(o => o.type === type && o.nameYn === nameYn);
+  return idx === -1 ? 99 : idx;
+}
+
+function updateSummary() {
+  const rows = document.querySelectorAll('.order-row');
+  const namedEntries = [];   // ネームあり → 個人単位1行
+  const groupMap     = {};   // ネームなし → {type+size} でまとめる
+  let total = 0;
+
+  rows.forEach(row => {
+    const id       = row.dataset.id;
+    const type     = document.getElementById(`type_${id}`)?.value     || '';
+    const nameYn   = document.getElementById(`name_yn_${id}`)?.value  || 'なし';
+    const nameKana = (document.getElementById(`name_kana_${id}`)?.value  || '').trim();
+    const nameAlpha= (document.getElementById(`name_alpha_${id}`)?.value || '').toUpperCase().trim();
+    const size     = document.getElementById(`size_${id}`)?.value     || '';
+    const qty      = parseInt(document.getElementById(`qty_${id}`)?.value) || 0;
+    if (!type || qty <= 0) return;
+    total += qty;
+
+    if (nameYn === 'あり') {
+      namedEntries.push({ type, nameYn, nameKana, nameAlpha, size, qty });
+    } else {
+      const key = `${type}||${size}`;
+      if (groupMap[key]) groupMap[key].qty += qty;
+      else groupMap[key] = { type, nameYn: 'なし', nameKana: '', nameAlpha: '', size, qty };
+    }
+  });
+
+  // ネームあり：グループ→サイズ順
+  namedEntries.sort((a, b) => {
+    const gd = summaryGroupKey(a.type, a.nameYn) - summaryGroupKey(b.type, b.nameYn);
+    if (gd !== 0) return gd;
+    return (SIZE_ORDER[a.size] ?? 99) - (SIZE_ORDER[b.size] ?? 99);
+  });
+
+  // ネームなし：グループ→サイズ順
+  const groupEntries = Object.values(groupMap).sort((a, b) => {
+    const gd = summaryGroupKey(a.type, a.nameYn) - summaryGroupKey(b.type, b.nameYn);
+    if (gd !== 0) return gd;
+    return (SIZE_ORDER[a.size] ?? 99) - (SIZE_ORDER[b.size] ?? 99);
+  });
+
+  // 表示順：ネームあり全部 → ネームなし全部
+  const entries = [...namedEntries, ...groupEntries];
+
+  const tbody = document.getElementById('summaryBody');
+  const tfoot = document.getElementById('summaryFoot');
+
+  if (!entries.length) {
+    tbody.innerHTML = `<tr><td colspan="4" style="color:#bbb;text-align:center;padding:14px">入力されていません</td></tr>`;
+    tfoot.innerHTML = `<tr class="summary-total-row"><td colspan="3">合　計</td><td>0 枚</td></tr>`;
+    return;
+  }
+
+  let lastGroupKey = -1;
+  tbody.innerHTML = entries.map(e => {
+    const gk = summaryGroupKey(e.type, e.nameYn);
+    const sep = (lastGroupKey !== -1 && gk !== lastGroupKey) ? 'border-top:2px solid #f0d4d0;' : '';
+    lastGroupKey = gk;
+
+    // ネームあり → ひらがな（アルファベット）を表示
+    let nameCell = '';
+    if (e.nameYn === 'あり') {
+      const parts = [e.nameKana, e.nameAlpha ? `(${e.nameAlpha})` : ''].filter(Boolean).join(' ');
+      nameCell = `<span style="color:#555;font-size:0.8rem;margin-left:4px">${parts || '—'}</span>`;
+    }
+
+    return `<tr style="${sep}">
+      <td>${e.type}</td>
+      <td>${e.nameYn}${nameCell}</td>
+      <td>${e.size || '—'}</td>
+      <td>${e.qty} 枚</td>
+    </tr>`;
+  }).join('');
+
+  tfoot.innerHTML = `<tr class="summary-total-row">
+    <td colspan="3">合　計</td>
+    <td>${total} 枚</td>
+  </tr>`;
+}
+
+
+/* ============================================================
+   EXCEL ダウンロード  (SheetJS CDN 不使用 → CSV→xlsx 風 TSV)
+   ※ SheetJSを使わずブラウザ標準のBlob APIでxlsx互換CSVを生成
+   ============================================================ */
+function buildExcelRows() {
+  // 集計と同じ順序でデータを並べて返す
+  const rows = document.querySelectorAll('.order-row');
+  const namedEntries = [];
+  const groupMap     = {};
+
+  rows.forEach(row => {
+    const id        = row.dataset.id;
+    const type      = document.getElementById(`type_${id}`)?.value      || '';
+    const nameYn    = document.getElementById(`name_yn_${id}`)?.value   || 'なし';
+    const nameKana  = (document.getElementById(`name_kana_${id}`)?.value  || '').trim();
+    const nameAlpha = (document.getElementById(`name_alpha_${id}`)?.value || '').toUpperCase().trim();
+    const size      = document.getElementById(`size_${id}`)?.value      || '';
+    const qty       = parseInt(document.getElementById(`qty_${id}`)?.value) || 0;
+    if (!type || qty <= 0) return;
+
+    if (nameYn === 'あり') {
+      namedEntries.push({ type, nameYn, nameKana, nameAlpha, size, qty });
+    } else {
+      const key = `${type}||${size}`;
+      if (groupMap[key]) groupMap[key].qty += qty;
+      else groupMap[key] = { type, nameYn: 'なし', nameKana: '', nameAlpha: '', size, qty };
+    }
+  });
+
+  const sortFn = (a, b) => {
+    const gd = summaryGroupKey(a.type, a.nameYn) - summaryGroupKey(b.type, b.nameYn);
+    if (gd !== 0) return gd;
+    return (SIZE_ORDER[a.size] ?? 99) - (SIZE_ORDER[b.size] ?? 99);
+  };
+  namedEntries.sort(sortFn);
+  const groupEntries = Object.values(groupMap).sort(sortFn);
+  return [...namedEntries, ...groupEntries];
+}
+
+function downloadExcel() {
+  const name = document.getElementById('customerName').value.trim();
+
+  // バリデーション
+  const entries = buildExcelRows();
+  if (!entries.length) { showToast('入力データがありません', 'warn'); return; }
+
+  // BOM付きCSV（Excelで文字化けしない）
+  const header = ['種類・色', 'ネーム有無', 'ネーム（ひらがな）', 'ネーム（アルファベット）', 'サイズ', '数量（枚）'];
+  const escape = v => `"${String(v).replace(/"/g, '""')}"`;
+
+  const csvRows = [
+    header.map(escape).join(','),
+    ...entries.map(e => [
+      e.type, e.nameYn, e.nameKana, e.nameAlpha, e.size, e.qty
+    ].map(escape).join(','))
+  ];
+
+  const bom  = '\uFEFF';
+  const blob = new Blob([bom + csvRows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const date = new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'2-digit', day:'2-digit' }).replace(/\//g, '');
+  a.href     = url;
+  a.download = name ? `Tシャツオーダー_${name}_${date}.csv` : `Tシャツオーダー_${date}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📥 ダウンロードしました', 'success');
+}
+
+/* ============================================================
+   SUBMIT — Google Apps Script 経由でメール送信
+   ============================================================ */
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwCWmIBUYDWeBnUqG-CpZzQ8VTYL-Zv2KAnb1R4JjHBczhJcsxfLlm_fDtQqn256g/exec';
+
+async function submitForm() {
+  // ---- バリデーション ----
+  const rows = document.querySelectorAll('.order-row');
+  let hasError = false;
+  rows.forEach(row => {
+    const id = row.dataset.id;
+    if (!document.getElementById(`type_${id}`)?.value ||
+        !document.getElementById(`size_${id}`)?.value) hasError = true;
+  });
+  if (hasError) { showToast('種類・色 と サイズ をすべて選択してください', 'warn'); return; }
+
+  const customerName = document.getElementById('customerName').value.trim();
+  if (!customerName) { showToast('お客様名を入力してください', 'warn'); return; }
+
+  // ---- 送信データ組み立て ----
+  const entries = buildExcelRows();
+  const total   = entries.reduce((s, e) => s + e.qty, 0);
+  const lines   = entries.map(e => {
+    const namePart = e.nameYn === 'あり' ? `  ネーム: ${e.nameKana}（${e.nameAlpha}）` : '';
+    return `・${e.type}  ${e.nameYn}${namePart}  サイズ: ${e.size}  ${e.qty}枚`;
+  });
+
+  const payload = {
+    customerName,
+    lines,
+    total,
+    sentAt: new Date().toLocaleString('ja-JP'),
+  };
+
+  // ---- 送信ボタンを無効化 ----
+  const btn = document.querySelector('.btn-submit');
+  btn.disabled    = true;
+  btn.textContent = '送信中…';
+
+  try {
+    // GETパラメータ方式でGASに送信（no-corsでも確実に届く）
+    const params = new URLSearchParams({
+      customerName: payload.customerName,
+      lines:        JSON.stringify(payload.lines),
+      total:        payload.total,
+      sentAt:       payload.sentAt,
+    });
+
+    await fetch(GAS_URL + '?' + params.toString(), {
+      method: 'GET',
+      mode:   'no-cors',
+    });
+
+    document.getElementById('submitSuccess').style.display = 'block';
+    document.getElementById('submitSuccess').scrollIntoView({ behavior: 'smooth' });
+    showToast('✓ 送信が完了しました！', 'success');
+
+  } catch (err) {
+    console.error(err);
+    showToast('送信に失敗しました。時間をおいて再試行してください', 'warn');
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = '✉ 送　信';
+  }
+}
+
+/* ============================================================
+   AUTO SAVE (30秒ごと)
+   ============================================================ */
+setInterval(() => {
+  if (isDirty) {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(collectData()));
+    markSaved();
+  }
+}, 30000);
+
+/* ============================================================
+   INIT
+   ============================================================ */
+(function init() {
+  const raw = localStorage.getItem(SAVE_KEY);
+  if (raw) {
+    try {
+      const data = JSON.parse(raw);
+      if (data.rows?.length) {
+        data.rows.forEach(r => addRow(r));
+        if (data.customerName) document.getElementById('customerName').value = data.customerName;
+        markSaved();
+        showToast('前回の保存データを読み込みました');
+        return;
+      }
+    } catch(e) {}
+  }
+  addRow(); // 初期は1行のみ
+  markSaved();
+})();
+</script>
+</body>
+</html>
