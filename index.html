@@ -349,6 +349,8 @@ body {
   cursor: pointer;
 }
 .field input[type="number"] { text-align: center; }
+.field.f-alpha input { text-transform: uppercase; }
+
 .field input:disabled,
 .field select:disabled {
   background: #f0eeec;
@@ -1040,7 +1042,7 @@ function addRow(data = null, afterRow = null) {
       <input type="text"
         id="name_kana_${id}"
         value="${kanaVal}"
-        inputmode="hiragana"
+        inputmode="kana"
         lang="ja"
         autocomplete="off"
         oninput="markUnsaved()"
@@ -1054,7 +1056,8 @@ function addRow(data = null, afterRow = null) {
         inputmode="latin"
         autocapitalize="characters"
         autocomplete="off"
-        oninput="markUnsaved()"
+        style="text-transform:uppercase"
+        oninput="this.value=this.value.toUpperCase();markUnsaved()"
         ${nameDisabled ? 'disabled' : ''}>
     </div>
 
