@@ -1042,9 +1042,12 @@ function addRow(data = null, afterRow = null) {
       <input type="text"
         id="name_kana_${id}"
         value="${kanaVal}"
-        inputmode="kana"
+        inputmode="hiragana"
         lang="ja"
         autocomplete="off"
+        autocorrect="off"
+        autocapitalize="none"
+        spellcheck="false"
         oninput="markUnsaved()"
         ${nameDisabled ? 'disabled' : ''}>
     </div>
@@ -1053,9 +1056,11 @@ function addRow(data = null, afterRow = null) {
       <input type="text"
         id="name_alpha_${id}"
         value="${alphaVal}"
-        inputmode="latin"
-        autocapitalize="characters"
+        inputmode="text"
         autocomplete="off"
+        autocorrect="off"
+        autocapitalize="characters"
+        spellcheck="false"
         style="text-transform:uppercase"
         oninput="this.value=this.value.toUpperCase();markUnsaved()"
         ${nameDisabled ? 'disabled' : ''}>
