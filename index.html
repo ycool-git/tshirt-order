@@ -679,40 +679,144 @@ body {
 .toast.warn    { background: #e67e22; }
 
 /* ======== RESPONSIVE (tablet / mobile) ======== */
-@media (max-width: 700px) {
-  .tbl-head { display: none; }
+/* ======== TABLET (768px以下) ======== */
+@media (max-width: 768px) {
+  body { padding: 16px 10px 60px; }
 
-  .order-row {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto;
-    gap: 6px;
-    padding: 10px;
-  }
-
-  /* row number / drag handle spans full width at top */
-  .row-num {
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.78rem;
-    cursor: grab;
-  }
-  .row-num .drag-dots { display: inline; margin-bottom: 0; font-size: 1rem; }
-
-  /* each field takes half width by default */
-  .field { grid-column: span 1; }
-
-  /* ひらがな・アルファベット: full width on mobile so keyboard hint works nicely */
-  .field.f-kana,
-  .field.f-alpha { grid-column: 1 / -1; }
-
-  /* action buttons at bottom */
-  .row-btns { grid-column: 1 / -1; justify-content: flex-end; }
+  .page-header h1 { font-size: 1.5rem; }
 
   .bottom-actions { flex-direction: column; }
   .left-actions, .right-actions { width: 100%; }
   .btn-submit { width: 100%; text-align: center; }
+  .btn-excel  { width: 100%; text-align: center; }
+
+  .customer-bar { padding: 12px 14px; }
+  .customer-input { width: 100%; }
+
+  /* 集計テーブルをスクロール可能に */
+  .summary-section { padding: 16px 12px; }
+  .summary-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .summary-table { min-width: 560px; }
+}
+
+/* ======== SMARTPHONE (600px以下) ======== */
+@media (max-width: 600px) {
+  /* 入力エリアの赤帯ヘッダーを非表示 */
+  .tbl-head { display: none; }
+
+  /* 各行をカード形式に */
+  .order-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 10px 10px 6px;
+    border-radius: 6px;
+  }
+
+  /* ドラッグハンドルと行番号 */
+  .row-num {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--soft);
+    margin-bottom: 6px;
+    cursor: grab;
+  }
+  .row-num .drag-dots { display: inline; font-size: 1rem; }
+
+  /* フィールドを縦並びに */
+  .field { width: 100%; margin-bottom: 6px; }
+  .field select,
+  .field input[type="text"],
+  .field input[type="number"] {
+    font-size: 1rem;
+    padding: 8px 10px;
+  }
+
+  /* フィールドラベル（スマホ時のみ表示） */
+  .field::before {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--soft);
+    font-weight: 700;
+    margin-bottom: 3px;
+    letter-spacing: 0.04em;
+  }
+  .field.f-type::before   { content: '種類・色'; }
+  .field.f-nameyn::before { content: 'ネーム有無'; }
+  .field.f-kana::before   { content: 'ネーム（ひらがな）'; }
+  .field.f-alpha::before  { content: 'ネーム（アルファベット）'; }
+  .field.f-size::before   { content: 'サイズ'; }
+  .field.f-qty::before    { content: '数量'; }
+
+  /* 操作ボタン */
+  .row-btns {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  /* ---- 集計テーブル：スマホはカード形式 ---- */
+  .summary-section { padding: 16px 12px; }
+  .sort-panel { flex-wrap: wrap; }
+
+  /* テーブルを非表示にしてカードで代替 */
+  .summary-table thead { display: none; }
+  .summary-table,
+  .summary-table tbody,
+  .summary-table tfoot,
+  .summary-table tr { display: block; width: 100%; }
+
+  .summary-table tbody tr {
+    background: var(--field-bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 10px;
+  }
+
+  .summary-table tbody td {
+    padding: 2px 0;
+    border: none;
+    font-size: 0.82rem;
+  }
+
+  /* データラベルをbefore疑似要素で表示 */
+  .summary-table tbody td:nth-child(1)::before { content: '種類・色：'; color: var(--soft); font-size: 0.7rem; display: block; }
+  .summary-table tbody td:nth-child(2)::before { content: 'ネーム：'; color: var(--soft); font-size: 0.7rem; display: block; }
+  .summary-table tbody td:nth-child(3)::before { content: 'ひらがな：'; color: var(--soft); font-size: 0.7rem; display: block; }
+  .summary-table tbody td:nth-child(4)::before { content: 'アルファベット：'; color: var(--soft); font-size: 0.7rem; display: block; }
+  .summary-table tbody td:nth-child(5)::before { content: 'サイズ：'; color: var(--soft); font-size: 0.7rem; display: block; }
+  .summary-table tbody td:nth-child(6) {
+    grid-column: 1 / -1;
+    text-align: right;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border-top: 1px solid var(--border);
+    padding-top: 6px;
+    margin-top: 2px;
+  }
+  .summary-table tbody td:nth-child(6)::before { content: '数量：'; color: var(--soft); font-size: 0.7rem; display: inline; }
+
+  /* 合計行 */
+  .summary-table tfoot tr {
+    display: flex;
+    justify-content: space-between;
+    border-top: 2px solid var(--red);
+    padding-top: 10px;
+    margin-top: 4px;
+  }
+  .summary-table tfoot td { border: none; padding: 4px 0; }
+  .summary-total-row td:first-child { color: var(--red); font-weight: 900; font-size: 1rem; }
+  .summary-total-row td:last-child  { color: var(--red); font-weight: 900; font-size: 1rem; }
+
+  /* ソートパネル */
+  .sort-panel { padding: 8px 10px; }
 }
 </style>
 </head>
@@ -766,6 +870,7 @@ body {
     <button class="btn-sort-reset" onclick="resetAllSort()">× リセット</button>
   </div>
 
+  <div class="summary-table-wrap">
   <table class="summary-table">
     <thead>
       <tr>
@@ -792,6 +897,7 @@ body {
     <tbody id="summaryBody"></tbody>
     <tfoot id="summaryFoot"></tfoot>
   </table>
+  </div>
 </div>
 
 <!-- お客様名入力 -->
@@ -971,14 +1077,14 @@ function addRow(data = null, afterRow = null) {
       <span class="num-label">${document.querySelectorAll('.order-row').length + 1}</span>
     </div>
 
-    <div class="field">
+    <div class="field f-type">
       <select id="type_${id}" onchange="onTypeChange(this,${id})" oninput="markUnsaved()">
         <option value="">選択してください</option>
         ${prodOpts}
       </select>
     </div>
 
-    <div class="field">
+    <div class="field f-nameyn">
       <select id="name_yn_${id}" onchange="onNameYnChange(this,${id})" oninput="markUnsaved()" ${nameYnDisabled}>
         ${nameYnOpts}
       </select>
@@ -999,21 +1105,21 @@ function addRow(data = null, afterRow = null) {
       <input type="text"
         id="name_alpha_${id}"
         value="${alphaVal}"
-        inputmode="text"
+        inputmode="latin"
         autocapitalize="characters"
         autocomplete="off"
         oninput="markUnsaved()"
         ${nameDisabled ? 'disabled' : ''}>
     </div>
 
-    <div class="field">
+    <div class="field f-size">
       <select id="size_${id}" oninput="markUnsaved();updateSummary()">
         <option value="">-</option>
         ${sizeOpts}
       </select>
     </div>
 
-    <div class="field">
+    <div class="field f-qty">
       <input type="number" id="qty_${id}" value="${qtyVal}" min="1" max="999"
         inputmode="numeric"
         oninput="markUnsaved();updateSummary()">
