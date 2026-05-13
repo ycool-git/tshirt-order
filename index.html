@@ -679,27 +679,33 @@ body {
 .toast.warn    { background: #e67e22; }
 
 /* ======== RESPONSIVE (tablet / mobile) ======== */
-/* ======== TABLET (768px以下) ======== */
+/* ======== TABLET / SMARTPHONE 共通 (768px以下) ======== */
 @media (max-width: 768px) {
   body { padding: 16px 10px 60px; }
-
   .page-header h1 { font-size: 1.5rem; }
 
   .bottom-actions { flex-direction: column; }
   .left-actions, .right-actions { width: 100%; }
-  .btn-submit { width: 100%; text-align: center; }
-  .btn-excel  { width: 100%; text-align: center; }
+  .btn-submit, .btn-excel { width: 100%; text-align: center; }
 
-  .customer-bar { padding: 12px 14px; }
+  .customer-bar { padding: 12px 14px; flex-wrap: wrap; }
   .customer-input { width: 100%; }
 
-  /* 集計テーブルをスクロール可能に */
-  .summary-section { padding: 16px 12px; }
-  .summary-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .summary-table { min-width: 560px; }
+  /* 集計エリア：横スクロール */
+  .summary-section { padding: 14px 10px; }
+  .summary-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .summary-table { min-width: 560px; font-size: 0.78rem; }
+  .summary-table th, .summary-table td { padding: 6px 8px; }
+
+  /* ソートパネル */
+  .sort-panel { flex-wrap: wrap; gap: 6px; padding: 8px 10px; }
+  .sort-keys  { flex-wrap: wrap; }
 }
 
-/* ======== SMARTPHONE (600px以下) ======== */
+/* ======== SMARTPHONE のみ (600px以下) ======== */
 @media (max-width: 600px) {
   /* 入力エリアの赤帯ヘッダーを非表示 */
   .tbl-head { display: none; }
@@ -757,66 +763,6 @@ body {
     gap: 6px;
     margin-top: 4px;
   }
-
-  /* ---- 集計テーブル：スマホはカード形式 ---- */
-  .summary-section { padding: 16px 12px; }
-  .sort-panel { flex-wrap: wrap; }
-
-  /* テーブルを非表示にしてカードで代替 */
-  .summary-table thead { display: none; }
-  .summary-table,
-  .summary-table tbody,
-  .summary-table tfoot,
-  .summary-table tr { display: block; width: 100%; }
-
-  .summary-table tbody tr {
-    background: var(--field-bg);
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    padding: 8px 10px;
-    margin-bottom: 6px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px 10px;
-  }
-
-  .summary-table tbody td {
-    padding: 2px 0;
-    border: none;
-    font-size: 0.82rem;
-  }
-
-  /* データラベルをbefore疑似要素で表示 */
-  .summary-table tbody td:nth-child(1)::before { content: '種類・色：'; color: var(--soft); font-size: 0.7rem; display: block; }
-  .summary-table tbody td:nth-child(2)::before { content: 'ネーム：'; color: var(--soft); font-size: 0.7rem; display: block; }
-  .summary-table tbody td:nth-child(3)::before { content: 'ひらがな：'; color: var(--soft); font-size: 0.7rem; display: block; }
-  .summary-table tbody td:nth-child(4)::before { content: 'アルファベット：'; color: var(--soft); font-size: 0.7rem; display: block; }
-  .summary-table tbody td:nth-child(5)::before { content: 'サイズ：'; color: var(--soft); font-size: 0.7rem; display: block; }
-  .summary-table tbody td:nth-child(6) {
-    grid-column: 1 / -1;
-    text-align: right;
-    font-weight: 700;
-    font-size: 0.95rem;
-    border-top: 1px solid var(--border);
-    padding-top: 6px;
-    margin-top: 2px;
-  }
-  .summary-table tbody td:nth-child(6)::before { content: '数量：'; color: var(--soft); font-size: 0.7rem; display: inline; }
-
-  /* 合計行 */
-  .summary-table tfoot tr {
-    display: flex;
-    justify-content: space-between;
-    border-top: 2px solid var(--red);
-    padding-top: 10px;
-    margin-top: 4px;
-  }
-  .summary-table tfoot td { border: none; padding: 4px 0; }
-  .summary-total-row td:first-child { color: var(--red); font-weight: 900; font-size: 1rem; }
-  .summary-total-row td:last-child  { color: var(--red); font-weight: 900; font-size: 1rem; }
-
-  /* ソートパネル */
-  .sort-panel { padding: 8px 10px; }
 }
 </style>
 </head>
