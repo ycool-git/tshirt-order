@@ -501,6 +501,19 @@ body {
   border-collapse: collapse;
   font-size: 0.84rem;
 }
+.summary-table th.sort-th {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.summary-table th.sort-th:hover { color: var(--red); }
+.th-arr {
+  font-size: 0.6rem;
+  color: #ccc;
+  margin-left: 2px;
+}
+.th-arr.active-arr { color: var(--red); }
+
 .summary-table th {
   text-align: left;
   font-size: 0.72rem;
@@ -710,63 +723,18 @@ body {
   <span class="jp-title">Tシャツ オーダーフォーム</span>
 </div>
 
-<!-- ソートパネル -->
-<div class="sort-panel">
-  <span class="sort-panel-label">ソート順：</span>
-  <div class="sort-keys" id="sortKeys">
-    <span class="sort-empty" id="sortEmpty">ヘッダーの ▲▼ をクリックして追加</span>
-  </div>
-  <button class="btn-sort-reset" onclick="resetAllSort()">× リセット</button>
-</div>
-
 <!-- Main card -->
 <div class="card">
 
-  <!-- 赤帯ヘッダー（ソートアイコン入り） -->
+  <!-- 赤帯ヘッダー -->
   <div class="tbl-head" id="tblHead">
     <div class="tbl-head-cell">No.</div>
-    <div class="tbl-head-cell">
-      種類・色
-      <button class="sort-icon-btn" id="sort-type" title="種類順に並び替え" onclick="sortRows('type')">
-        <span class="arr" id="arr-type-a">▲</span>
-        <span class="arr" id="arr-type-d">▼</span>
-      </button>
-    </div>
-    <div class="tbl-head-cell">
-      ネーム有無
-      <button class="sort-icon-btn" id="sort-name" title="ネーム有無で並び替え" onclick="sortRows('name')">
-        <span class="arr" id="arr-name-a">▲</span>
-        <span class="arr" id="arr-name-d">▼</span>
-      </button>
-    </div>
-    <div class="tbl-head-cell">
-      ネーム（ひらがな）
-      <button class="sort-icon-btn" id="sort-kana" title="ひらがな順に並び替え" onclick="sortRows('kana')">
-        <span class="arr" id="arr-kana-a">▲</span>
-        <span class="arr" id="arr-kana-d">▼</span>
-      </button>
-    </div>
-    <div class="tbl-head-cell">
-      ネーム（アルファベット）
-      <button class="sort-icon-btn" id="sort-alpha" title="アルファベット順に並び替え" onclick="sortRows('alpha')">
-        <span class="arr" id="arr-alpha-a">▲</span>
-        <span class="arr" id="arr-alpha-d">▼</span>
-      </button>
-    </div>
-    <div class="tbl-head-cell">
-      サイズ
-      <button class="sort-icon-btn" id="sort-size" title="サイズ順に並び替え" onclick="sortRows('size')">
-        <span class="arr" id="arr-size-a">▲</span>
-        <span class="arr" id="arr-size-d">▼</span>
-      </button>
-    </div>
-    <div class="tbl-head-cell">
-      数量
-      <button class="sort-icon-btn" id="sort-qty" title="数量順に並び替え" onclick="sortRows('qty')">
-        <span class="arr" id="arr-qty-a">▲</span>
-        <span class="arr" id="arr-qty-d">▼</span>
-      </button>
-    </div>
+    <div class="tbl-head-cell">種類・色</div>
+    <div class="tbl-head-cell">ネーム有無</div>
+    <div class="tbl-head-cell">ネーム（ひらがな）</div>
+    <div class="tbl-head-cell">ネーム（アルファベット）</div>
+    <div class="tbl-head-cell">サイズ</div>
+    <div class="tbl-head-cell">数量</div>
     <div class="tbl-head-cell">操作</div>
   </div>
 
@@ -788,13 +756,37 @@ body {
 <!-- 集計 -->
 <div class="summary-section">
   <div class="section-title">集　計</div>
+
+  <!-- ソートパネル（集計内に移動） -->
+  <div class="sort-panel" style="margin:0 0 14px;box-shadow:none;background:#faf8f7;border:1.5px solid #e8e0dc;padding:10px 14px;">
+    <span class="sort-panel-label">ソート順：</span>
+    <div class="sort-keys" id="sortKeys">
+      <span class="sort-empty" id="sortEmpty">ヘッダーの ▲▼ をクリックして追加</span>
+    </div>
+    <button class="btn-sort-reset" onclick="resetAllSort()">× リセット</button>
+  </div>
+
   <table class="summary-table">
     <thead>
       <tr>
-        <th>種類・色</th>
-        <th>ネーム</th>
-        <th>サイズ</th>
-        <th>枚数</th>
+        <th class="sort-th" onclick="sortRows('type')" title="種類順">
+          種類・色 <span class="th-arr" id="arr-type-a">▲</span><span class="th-arr" id="arr-type-d">▼</span>
+        </th>
+        <th class="sort-th" onclick="sortRows('name')" title="ネーム有無順">
+          ネーム有無 <span class="th-arr" id="arr-name-a">▲</span><span class="th-arr" id="arr-name-d">▼</span>
+        </th>
+        <th class="sort-th" onclick="sortRows('kana')" title="ひらがな順">
+          ネーム（ひらがな） <span class="th-arr" id="arr-kana-a">▲</span><span class="th-arr" id="arr-kana-d">▼</span>
+        </th>
+        <th class="sort-th" onclick="sortRows('alpha')" title="アルファベット順">
+          ネーム（アルファベット） <span class="th-arr" id="arr-alpha-a">▲</span><span class="th-arr" id="arr-alpha-d">▼</span>
+        </th>
+        <th class="sort-th" onclick="sortRows('size')" title="サイズ順">
+          サイズ <span class="th-arr" id="arr-size-a">▲</span><span class="th-arr" id="arr-size-d">▼</span>
+        </th>
+        <th class="sort-th" onclick="sortRows('qty')" title="数量順">
+          数量 <span class="th-arr" id="arr-qty-a">▲</span><span class="th-arr" id="arr-qty-d">▼</span>
+        </th>
       </tr>
     </thead>
     <tbody id="summaryBody"></tbody>
@@ -831,7 +823,7 @@ body {
 <!-- 送信確認モーダル -->
 <div class="modal-overlay" id="confirmModal">
   <div class="modal-box">
-    <div class="modal-title">✉ メールを送信しますか？</div>
+    <div class="modal-title">送信確認</div>
     <div class="modal-body" id="confirmModalBody"></div>
     <div class="modal-btns">
       <button class="modal-cancel" onclick="closeModal()">キャンセル</button>
@@ -941,7 +933,7 @@ function clearAll() {
 /* ============================================================
    ROW CREATION
    ============================================================ */
-function addRow(data = null) {
+function addRow(data = null, afterRow = null) {
   rowId++;
   const id = rowId;
   const container = document.getElementById('rowsContainer');
@@ -1028,12 +1020,17 @@ function addRow(data = null) {
     </div>
 
     <div class="row-btns">
-      <button class="btn-copy-text" onclick="copyRow(${id})">複製</button>
+      <button class="btn-copy-text" onclick="copyRow(${id})">コピー</button>
       <button class="btn-del" title="削除" onclick="deleteRow(${id})">✕</button>
     </div>
   `;
 
-  container.appendChild(div);
+  // afterRowがあればその直後に、なければ末尾に追加
+  if (afterRow && afterRow.nextSibling) {
+    container.insertBefore(div, afterRow.nextSibling);
+  } else {
+    container.appendChild(div);
+  }
   setupDrag(div);
   updateRowNumbers();
   updateSummary();
@@ -1044,15 +1041,18 @@ function addRow(data = null) {
    COPY ROW
    ============================================================ */
 function copyRow(id) {
-  addRow({
-    type:       document.getElementById(`type_${id}`)?.value       || '',
-    name_yn:    document.getElementById(`name_yn_${id}`)?.value    || 'なし',
-    name_kana:  document.getElementById(`name_kana_${id}`)?.value  || '',
-    name_alpha: document.getElementById(`name_alpha_${id}`)?.value || '',
-    size:       document.getElementById(`size_${id}`)?.value       || '',
-    qty:        parseInt(document.getElementById(`qty_${id}`)?.value) || 1,
-  });
-  showToast('複製しました');
+  const data = {
+    type:       document.getElementById('type_'+id)?.value       || '',
+    name_yn:    document.getElementById('name_yn_'+id)?.value    || 'なし',
+    name_kana:  document.getElementById('name_kana_'+id)?.value  || '',
+    name_alpha: document.getElementById('name_alpha_'+id)?.value || '',
+    size:       document.getElementById('size_'+id)?.value       || '',
+    qty:        parseInt(document.getElementById('qty_'+id)?.value) || 1,
+  };
+  // コピー元の行のすぐ次に挿入
+  const srcRow = document.querySelector('.order-row[data-id="'+id+'"]');
+  addRow(data, srcRow);
+  showToast('コピーしました');
 }
 
 /* ============================================================
@@ -1252,33 +1252,15 @@ function getRowVal(row, key) {
 }
 
 function applySort() {
-  if (!sortConditions.length) return;
-  const container = document.getElementById('rowsContainer');
-  const rows = [...container.querySelectorAll('.order-row')];
-  rows.sort((a, b) => {
-    for (const { key, dir } of sortConditions) {
-      const va = getRowVal(a, key);
-      const vb = getRowVal(b, key);
-      // 文字列はlocaleCompare、数値は引き算
-      const diff = (typeof va === 'string')
-        ? va.localeCompare(vb, 'ja')
-        : va - vb;
-      if (diff !== 0) return dir === 'asc' ? diff : -diff;
-    }
-    return 0;
-  });
-  rows.forEach(r => container.appendChild(r));
-  updateRowNumbers();
-  markUnsaved();
+  // 集計テーブルの表示順をソート（入力行はそのまま）
+  updateSummary();
 }
 
 function sortRows(key) {
   const existing = sortConditions.find(c => c.key === key);
   if (existing) {
-    // 既にある → 方向をトグル
     existing.dir = existing.dir === 'asc' ? 'desc' : 'asc';
   } else {
-    // 新規追加
     sortConditions.push({ key, dir: 'asc' });
   }
   applySort();
@@ -1297,6 +1279,7 @@ function resetAllSort() {
   sortConditions = [];
   renderSortPanel();
   renderSortArrows();
+  updateSummary();
   showToast('ソートをリセットしました');
 }
 
@@ -1320,16 +1303,14 @@ function renderSortPanel() {
 }
 
 function renderSortArrows() {
-  // 全矢印をリセット
   ['type','name','kana','alpha','size','qty'].forEach(k => {
     ['a','d'].forEach(d => {
-      const el = document.getElementById(`arr-${k}-${d}`);
+      const el = document.getElementById('arr-'+k+'-'+d);
       if (el) el.classList.remove('active-arr');
     });
   });
-  // アクティブな条件を反映
-  sortConditions.forEach(({ key, dir }) => {
-    const el = document.getElementById(`arr-${key}-${dir === 'asc' ? 'a' : 'd'}`);
+  sortConditions.forEach(function(c) {
+    const el = document.getElementById('arr-'+c.key+'-'+(c.dir === 'asc' ? 'a' : 'd'));
     if (el) el.classList.add('active-arr');
   });
 }
@@ -1389,8 +1370,7 @@ async function submitForm() {
 
   // ---- 確認モーダルを表示 ----
   document.getElementById('confirmModalBody').innerHTML =
-    '<strong>' + customerName + '</strong> 様のオーダーをメールで送信します。<br>' +
-    '合計 <strong>' + total + '枚</strong>（' + entries.length + '件）のデータとCSVファイルが添付されます。';
+    '合計 <strong>' + total + '枚</strong>です。データを送信しますか？';
   document.getElementById('confirmModal').classList.add('show');
 }
 
@@ -1491,42 +1471,64 @@ function updateSummary() {
   });
 
   // 表示順：ネームあり全部 → ネームなし全部
-  const entries = [...namedEntries, ...groupEntries];
+  let entries = [...namedEntries, ...groupEntries];
+
+  // sortConditionsがあればその順でソート（集計テーブルのみ）
+  if (sortConditions.length) {
+    const getSummaryVal = function(e, key) {
+      switch(key) {
+        case 'type': return PRODUCTS.indexOf(e.type);
+        case 'name': return e.nameYn === 'あり' ? 0 : 1;
+        case 'size': return SIZE_ORDER[e.size] ?? 99;
+        case 'qty':  return e.qty;
+        case 'kana': return e.nameKana || '';
+        case 'alpha':return e.nameAlpha || '';
+        default:     return 0;
+      }
+    };
+    entries.sort(function(a, b) {
+      for (var i = 0; i < sortConditions.length; i++) {
+        var key = sortConditions[i].key;
+        var dir = sortConditions[i].dir;
+        var va = getSummaryVal(a, key);
+        var vb = getSummaryVal(b, key);
+        var diff = (typeof va === 'string') ? va.localeCompare(vb, 'ja') : va - vb;
+        if (diff !== 0) return dir === 'asc' ? diff : -diff;
+      }
+      return 0;
+    });
+  }
 
   const tbody = document.getElementById('summaryBody');
   const tfoot = document.getElementById('summaryFoot');
 
   if (!entries.length) {
-    tbody.innerHTML = `<tr><td colspan="4" style="color:#bbb;text-align:center;padding:14px">入力されていません</td></tr>`;
-    tfoot.innerHTML = `<tr class="summary-total-row"><td colspan="3">合　計</td><td>0 枚</td></tr>`;
+    tbody.innerHTML = '<tr><td colspan="6" style="color:#bbb;text-align:center;padding:14px">入力されていません</td></tr>';
+    tfoot.innerHTML = '<tr class="summary-total-row"><td colspan="5">合　計</td><td>0 枚</td></tr>';
     return;
   }
 
   let lastGroupKey = -1;
-  tbody.innerHTML = entries.map(e => {
+  tbody.innerHTML = entries.map(function(e) {
     const gk = summaryGroupKey(e.type, e.nameYn);
     const sep = (lastGroupKey !== -1 && gk !== lastGroupKey) ? 'border-top:1px solid #ddd;' : '';
     lastGroupKey = gk;
-
-    // ネームあり → ひらがな（アルファベット）を表示
-    let nameCell = '';
-    if (e.nameYn === 'あり') {
-      const alpha = e.nameAlpha ? `(${e.nameAlpha})` : '';
-      nameCell = `<span style="color:#555;font-size:0.8rem;margin-left:4px">${alpha}</span>`;
-    }
-
-    return `<tr style="${sep}">
-      <td>${e.type}</td>
-      <td>${e.nameYn}${nameCell}</td>
-      <td>${e.size || '—'}</td>
-      <td>${e.qty} 枚</td>
-    </tr>`;
+    const kana  = e.nameYn === 'あり' ? (e.nameKana  || '—') : '—';
+    const alpha = e.nameYn === 'あり' ? (e.nameAlpha || '—') : '—';
+    return '<tr style="' + sep + '">'
+      + '<td>' + e.type + '</td>'
+      + '<td>' + e.nameYn + '</td>'
+      + '<td>' + kana + '</td>'
+      + '<td>' + alpha + '</td>'
+      + '<td>' + (e.size || '—') + '</td>'
+      + '<td style="text-align:right;font-weight:700;">' + e.qty + ' 枚</td>'
+      + '</tr>';
   }).join('');
 
-  tfoot.innerHTML = `<tr class="summary-total-row">
-    <td colspan="3">合　計</td>
-    <td>${total} 枚</td>
-  </tr>`;
+  tfoot.innerHTML = '<tr class="summary-total-row">'
+    + '<td colspan="5">合　計</td>'
+    + '<td>' + total + ' 枚</td>'
+    + '</tr>';
 }
 
 
